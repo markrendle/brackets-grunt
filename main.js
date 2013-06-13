@@ -68,7 +68,7 @@ define(function (require, exports, module) {
         
         $(nodeConnection).on("grunt.update", function (evt, data) {
             console.log(data);
-            $("#grunt .grunt-container").append($("<p>" + data + "</p>"));
+            $("#grunt .table-container").append($("<p>" + data + "</p>"));
         });
 
         chain(connect, loadGruntDomain);
@@ -81,7 +81,7 @@ define(function (require, exports, module) {
                              + '  <div class="toolbar simple-toolbar-layout">'
                              + '    <div class="title">Grunt</div><a href="#" class="close">&times;</a>'
                              + '  </div>'
-                             + '  <div class="grunt-container" style="padding: 4px"/>'
+                             + '  <div id="grunt-panel" class="table-container" style="padding: 4px; overflow: scroll"/>'
                              + '</div>';
 
         $grunt = PanelManager.createBottomPanel("grunt.display.grunt",$(content),200);
@@ -119,16 +119,18 @@ define(function (require, exports, module) {
             file    = entry.name;
         
         $grunt.show();
-        $("#grunt .grunt-container").empty().append($("<p>Running Grunt...</p>"));
+        var $output = $("#grunt .table-container");
+        $output.empty().append($("<p>Running...</p>"));
         _loadGruntfile(entry).done(function () {
             nodeConnection.domains.grunt.build(path, target)
                 .fail(function (err) {
                     console.error("[brackets-grunt] failed to run grunt", err);
-                    $("#grunt .grunt-container").append($("<p>Failed to run grunt; error code " + err.code + "</p>"));
+                    $output.append($("<p>Failed to run grunt; error code " + err.code + "</p>"));
                 })
                 .done(function (result) {
-                    console.log("[brackets-grunt] (%s)", result);
-                    $("#grunt .grunt-container").append($("<p>Grunt completed successfully.</p>"));
+                    result = result.replace(/\r?\n/mg, "<br />", "mg");
+                    $output.empty().append($("<p>" + result + "</p>"));
+                    $output.scrollTop($output[0].scrollHeight);
                 });
         }).fail(function (err) {
             console.log(err);

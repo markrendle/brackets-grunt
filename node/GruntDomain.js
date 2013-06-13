@@ -12,7 +12,9 @@
      */
     function cmdBuild(path, task, callback) {
         var exec    = require('child_process').exec,
-            cmd     = "grunt " + (task || ""),
+            fs      = require('fs'),
+            tmp     = "~grunt.tmp",
+            cmd     = "grunt --no-color " + (task || "") + " >" + tmp,
             child;
 
         if (path) {
@@ -20,7 +22,10 @@
         }
         
         child = exec(cmd, function (error, stdout, stderr) {
-            callback(error, stdout);
+            fs.readFile(tmp, function (error, data) {
+                fs.unlink(tmp);
+                callback(error, data.toString());
+            });
         });
         
         child.stdout.on("data", function (data) {
