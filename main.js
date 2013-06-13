@@ -10,18 +10,26 @@ define(function (require, exports, module) {
         FileIndexManager    = brackets.getModule("project/FileIndexManager"),
         FileUtils           = brackets.getModule("file/FileUtils"),
         Menus               = brackets.getModule("command/Menus"),
-        NativeFileSystem    = brackets.getModule("file/NativeFileSystem"),
+        NativeFileSystem    = brackets.getModule("file/NativeFileSystem").NativeFileSystem,
         NodeConnection      = brackets.getModule("utils/NodeConnection"),
         PanelManager        = brackets.getModule("view/PanelManager"),
         ProjectManager      = brackets.getModule("project/ProjectManager");
     
-    var RUN_BUILD       = "grunt_build_cmd";
-    var SHOW_ANT_PANEL  = "show_grunt_panel_cmd";
+    var RUN_BUILD           = "grunt_build_cmd";
+    var SHOW_ANT_PANEL      = "show_grunt_panel_cmd";
     var nodeConnection;
     
-    var contextMenu     = Menus.getContextMenu(Menus.ContextMenuIds.PROJECT_MENU),
-        menuItems       = [],
-        buildMenuItem   = null,
+    var PROJECT_MENU        = "project-menu",
+        PROJECT_MENU_NAME   = "Project",
+        GRUNT_DEFAULT       = "project-grunt-default";
+    
+    var contextMenu         = Menus.getContextMenu(Menus.ContextMenuIds.PROJECT_MENU),
+        projectMenu,
+        gruntFile,
+        defaultMenuItem,
+        gruntDefaultCommand,
+        gruntMenuItems           = [],
+        buildMenuItem       = null,
         $grunt;
     
     var gruntParser = require("GruntParser");
@@ -39,7 +47,64 @@ define(function (require, exports, module) {
         }
     }
     
+    function _loadGruntTasks() {
+        function loadTargets(targets) {
+            $.each(targets, function (index, target) {
+                var id = RUN_BUILD + target.replace(":","-");
+                if (!CommandManager.get(id)) {
+                    CommandManager.register("Grunt " + target, id, function () {
+                        _runBuild(target);
+                    });
+                }
+                
+                projectMenu.addMenuItem(id, "", Menus.LAST);
+                gruntMenuItems.push(id);
+            });
+            
+        }
+        
+        function getGruntFile(directory) {
+            directory.getFile("Gruntfile.js", {create: false, exclusive: false},
+                              function (file) {
+                                  gruntFile = file;
+                                  gruntDefaultCommand.setEnabled(true);
+                                  _loadGruntfile(file).done(loadTargets);
+                              },
+                              function (error) {
+                                  gruntFile = undefined;
+                                  gruntDefaultCommand.setEnabled(false);
+                              });
+        }
+        
+        _removeAllProjectMenuItems();
+        var root = ProjectManager.getProjectRoot();
+        NativeFileSystem.resolveNativeFileSystemPath(root.fullPath, getGruntFile);
+    }
+    
+    function _initializeTopMenu() {
+        projectMenu = Menus.getMenu(PROJECT_MENU);
+        if (projectMenu) {
+            projectMenu.addMenuDivider();
+        } else {
+            projectMenu = Menus.addMenu(PROJECT_MENU_NAME, PROJECT_MENU, Menus.AFTER, Menus.AppMenuBar.NAVIGATE_MENU);
+        }
+        gruntDefaultCommand = CommandManager.register("Grunt default", GRUNT_DEFAULT, function () {
+                            _runBuild();
+                        });
+        defaultMenuItem = projectMenu.addMenuItem(GRUNT_DEFAULT, "F6");
+        
+        _loadGruntTasks();
+        $(ProjectManager).on("projectOpen", function() {
+            _loadGruntTasks();
+        });
+        $(ProjectManager).on("projectFilesChanged", function() {
+            _loadGruntTasks();
+        });
+    }
+    
     AppInit.appReady(function () {
+        
+        _initializeTopMenu();
         
         nodeConnection = new NodeConnection();
         
@@ -114,7 +179,7 @@ define(function (require, exports, module) {
     
     // 
     function _runBuild(target) {
-        var entry   = ProjectManager.getSelectedItem(),
+        var entry   = gruntFile,
             path    = entry.fullPath.substring(0, entry.fullPath.lastIndexOf("/")),
             file    = entry.name;
         
@@ -137,41 +202,31 @@ define(function (require, exports, module) {
         });
     }
     
-    function _showAntPanel() {
-        FileIndexManager.getFileInfoList("all")
-            .done(function (fileListResult) {
-                console.log(fileListResult);
-            });
-    }
-    
     function _removeAllContextMenuItems() {
-        $.each(menuItems, function (index, target) {
+        $.each(gruntMenuItems, function (index, target) {
             contextMenu.removeMenuItem(target);
         });
     }
+    
+    function _removeAllProjectMenuItems() {
+        $.each(gruntMenuItems, function (index, target) {
+            projectMenu.removeMenuItem(target);
+        });
+    }
         
-    $(contextMenu).on("beforeContextMenuOpen", function (evt) {
-        
+    $(contextMenu).on("beforeContextMenuOpen", function (evt) {        
         var selectedEntry = ProjectManager.getSelectedItem();
+        console.log(selectedEntry);
         
         _removeAllContextMenuItems();
         
         if (_isGruntfile(selectedEntry)) {
-            _loadGruntfile(selectedEntry).done(function (targets) {
-                $.each(targets, function (index, target) {
-                    var id = RUN_BUILD + target.replace(":","-");
-                    if (!CommandManager.get(id)) {
-                        CommandManager.register("Build " + target + "...", id, function () {
-                            _runBuild(target);
-                        });
-                    }
-                    
-                    contextMenu.addMenuItem(id, "", Menus.LAST);
-                    menuItems.push(id);
-                });
+            contextMenu.addMenuItem(gruntDefaultCommand, "", Menus.LAST);
+            $.each(gruntMenuItems, function (index, target) {
+                contextMenu.addMenuItem(target, "", Menus.LAST);
             });
+            contextMenu.addMenuItem(Menus.DIVIDER, "", Menus.LAST);
         }
     });
     
-    contextMenu.addMenuItem(Menus.DIVIDER, "", Menus.LAST);
 });

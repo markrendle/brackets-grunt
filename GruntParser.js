@@ -1,7 +1,7 @@
 define(function(require, exports, module){
     function noop() {}
     function parse(gruntfileText) {
-        var targets = ['default'],
+        var targets = [],
             module = {},
             config;
         // Yes, we're just going to eval the entire Gruntfile.

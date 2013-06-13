@@ -3,9 +3,9 @@ brackets-grunt
 
 An extension for Brackets that adds items to the context menu for Gruntfile.js to run tasks or sub-tasks.
 
-# TODO
-* Add a Grunt sub-menu to one of the top-level menus. (Debug?)
-* Add a quick keyboard shortcut for /grunt default/
+## Use
+You can run any tasks from the Grunt file from the main Project menu, or the context menu for the Gruntfile.js entry.
+Or, to run the default task(s), just hit F6.
 
-# Credits
+## Credits
 This project was derived from [brackets-ant](https://github.com/jbalsas/brackets-ant) by [Chema Balsas](https://github.com/jbalsas)
