@@ -77,6 +77,7 @@ define(function (require, exports, module) {
         }
         
         _removeAllProjectMenuItems();
+        gruntMenuItems = [];
         var root = ProjectManager.getProjectRoot();
         NativeFileSystem.resolveNativeFileSystemPath(root.fullPath, getGruntFile);
     }
