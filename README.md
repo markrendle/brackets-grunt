@@ -9,3 +9,7 @@ Or, to run the default task(s), just hit F6.
 
 ## Credits
 This project was derived from [brackets-ant](https://github.com/jbalsas/brackets-ant) by [Chema Balsas](https://github.com/jbalsas)
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/markrendle/brackets-grunt/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
