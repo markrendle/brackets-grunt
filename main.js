@@ -6,6 +6,7 @@ define(function (require, exports, module) {
     
     var AppInit             = brackets.getModule("utils/AppInit"),
         CommandManager      = brackets.getModule("command/CommandManager"),
+        Commands            = brackets.getModule("command/Commands"),
         ExtensionUtils      = brackets.getModule("utils/ExtensionUtils"),
         FileIndexManager    = brackets.getModule("project/FileIndexManager"),
         FileUtils           = brackets.getModule("file/FileUtils"),
@@ -184,6 +185,7 @@ define(function (require, exports, module) {
             path    = entry.fullPath.substring(0, entry.fullPath.lastIndexOf("/")),
             file    = entry.name;
         
+        CommandManager.execute(Commands.FILE_SAVE_ALL);
         $grunt.show();
         var $output = $("#grunt .table-container");
         $output.empty().append($("<p>Running...</p>"));

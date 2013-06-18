@@ -3,7 +3,7 @@
     "title": "Grunt for Brackets",
     "description": "Shows context menu options to run tasks in Gruntfile.js",
     "homepage": "https://github.com/markrendle/brackets-grunt",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "author": "Mark Rendle <mark@oort.io> (https://github.com/markrendle)",
     "engines": {
         "brackets": ">=0.25.0"
