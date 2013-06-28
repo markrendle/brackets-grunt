@@ -56,6 +56,7 @@ define(function (require, exports, module) {
             "    grunt.loadNpmTasks('grunt-contrib-uglify');\r\n" +
             "    grunt.loadNpmTasks('grunt-typescript');\r\n" +
             "    grunt.loadNpmTasks('grunt-contrib-watch');\r\n" +
+            "    grunt.registerTask('custom', ['typescript', 'uglify']);\r\n" +
             "    grunt.registerTask('default', ['typescript', 'uglify']);\r\n" +
             "}";
         var targets = testapi.parse(text);
@@ -66,6 +67,7 @@ define(function (require, exports, module) {
             expect(targets).toContain("typescript");
             expect(targets).toContain("uglify");
             expect(targets).toContain("watch");
+            expect(targets).toContain("custom");
         });
         it("Should return sub-tasks with colon", function () {
             expect(targets).toContain("typescript:smash");
