@@ -11,7 +11,11 @@ define(function(require, exports, module){
             initConfig: function(_config) {
                 config = _config;
             },
-            registerTask: noop,
+            registerTask: function(_name) {
+                if (_name !== "default") {
+                    targets.push(_name);
+                }
+            },
             registerMultiTask: noop,
             renameTask: noop,
             loadTasks: noop,
