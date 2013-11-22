@@ -20,6 +20,7 @@ define(function(require, exports, module){
             renameTask: noop,
             loadTasks: noop,
             loadNpmTasks: noop,
+            option: noop,
             warn: noop,
             fatal: noop
         };
